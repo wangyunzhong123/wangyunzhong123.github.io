@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>冰雪奇缘2</title>
+    <url>/2019/12/01/%E5%86%B0%E9%9B%AA%E5%A5%87%E7%BC%982/</url>
+    <content><![CDATA[<h1 id="《冰雪奇缘2》"><a href="#《冰雪奇缘2》" class="headerlink" title="《冰雪奇缘2》"></a>《冰雪奇缘2》</h1><p>2019-11-23</p>
+<p>在东湖渠华谊电影院。</p>
+<p>9.0分。唯美公主梦</p>
+]]></content>
+      <categories>
+        <category>电影</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>2019年冬第一场雪</title>
+    <url>/2019/12/01/2019%E5%B9%B4%E5%86%AC%E7%AC%AC%E4%B8%80%E5%9C%BA%E9%9B%AA/</url>
+    <content><![CDATA[<p>雪：<br><img src="https://tva1.sinaimg.cn/large/9ea5011cly1g9hbzbztejj219i0pk7aq.jpg" alt="WechatIMG294"></p>
+<p>晚霞：<br><img src="https://tvax3.sinaimg.cn/large/9ea5011cly1g9hby9depaj23402c0e81.jpg" alt="y5Jc3SqPTNGGE34sox59dA"></p>
+]]></content>
+      <categories>
+        <category>生活</category>
+      </categories>
+      <tags>
+        <tag>雪</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>哆啦A梦伴我同行</title>
+    <url>/2019/12/01/%E5%93%86%E5%95%A6A%E6%A2%A6%E4%BC%B4%E6%88%91%E5%90%8C%E8%A1%8C/</url>
+    <content><![CDATA[<h1 id="《哆啦A梦伴我同行》"><a href="#《哆啦A梦伴我同行》" class="headerlink" title="《哆啦A梦伴我同行》"></a>《哆啦A梦伴我同行》</h1><p>7.5</p>
+<p>剧情较为单一。</p>
+]]></content>
+      <categories>
+        <category>电影</category>
+      </categories>
+      <tags>
+        <tag>电影</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用Hexo、githubPages搭建博客</title>
+    <url>/2019/12/01/%E4%BD%BF%E7%94%A8Hexo%E3%80%81githubPages%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="使用hexo、github-Pages搭建博客"><a href="#使用hexo、github-Pages搭建博客" class="headerlink" title="使用hexo、github Pages搭建博客"></a>使用hexo、github Pages搭建博客</h1><h2 id="1-安装node"><a href="#1-安装node" class="headerlink" title="1. 安装node"></a>1. 安装node</h2><p>如果本机已经有node，为避免安装出现问题，建议先升级到最新版。参考：<a href="https://juejin.im/post/5b9739d1e51d450e9f66ee3b" target="_blank" rel="noopener">https://juejin.im/post/5b9739d1e51d450e9f66ee3b</a></p>
+<h2 id="2-安装hexo"><a href="#2-安装hexo" class="headerlink" title="2. 安装hexo"></a>2. 安装hexo</h2><p>参考：<a href="https://segmentfault.com/a/1190000017986794" target="_blank" rel="noopener">https://segmentfault.com/a/1190000017986794</a></p>
+<p>里面有图床、主题、评论配置。</p>
+<h2 id="3-主题配置"><a href="#3-主题配置" class="headerlink" title="3. 主题配置"></a>3. 主题配置</h2><p>主题使用next的Pisces，具体可Google。</p>
+<p>其中，原生的这个主题两边留白太多，现在很多都是宽屏，包括本人很喜欢宽屏展示。可以参考：调节next主题宽度 <a href="https://zuiyu1818.cn/posts/NexT_codewidth.html" target="_blank" rel="noopener">https://zuiyu1818.cn/posts/NexT_codewidth.html</a></p>
+]]></content>
+      <categories>
+        <category>个人博客</category>
+      </categories>
+      <tags>
+        <tag>工具 个人博客</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java泛型</title>
+    <url>/2019/12/01/Java%E6%B3%9B%E5%9E%8B/</url>
+    <content><![CDATA[<h1 id="Java泛型"><a href="#Java泛型" class="headerlink" title="Java泛型"></a>Java泛型</h1><p>泛型：<a href="https://blog.csdn.net/briblue/article/details/76736356" target="_blank" rel="noopener">https://blog.csdn.net/briblue/article/details/76736356</a><br>《Effective Java中文版》<br>上下限通配符：<a href="https://www.cnblogs.com/alsf/p/5690052.html" target="_blank" rel="noopener">https://www.cnblogs.com/alsf/p/5690052.html</a> </p>
+<h2 id="1-泛型类型"><a href="#1-泛型类型" class="headerlink" title="1. 泛型类型"></a>1. 泛型类型</h2><ol>
+<li>泛型类。</li>
+<li>泛型方法。</li>
+<li>泛型接口。</li>
+</ol>
+<h2 id="2-原生态类型"><a href="#2-原生态类型" class="headerlink" title="2. 原生态类型"></a>2. 原生态类型</h2><p>List list = new ArrayList&lt;&gt;(); 就是原生态类型</p>
+<h2 id="3-类型参数"><a href="#3-类型参数" class="headerlink" title="3. 类型参数"></a>3. 类型参数</h2><p>实例化、定义方法、定义接口的时候，传入的类型参数，一般用大写的字母表示；</p>
+<p>List<E> {</p>
+<p>}</p>
+<h2 id="4-类型擦除"><a href="#4-类型擦除" class="headerlink" title="4. 类型擦除"></a>4. 类型擦除</h2><p>擦除就是使泛型可以与没有使用泛型的代码随意进行互用。</p>
+<p>创建泛型、参数化类型或者类型参数的数组是非法的：</p>
+<p>new List<E>[];<br>new List<String>[];<br>new E[];</p>
+<p>都是非法的。</p>
+<h2 id="5-通配符"><a href="#5-通配符" class="headerlink" title="5. 通配符"></a>5. 通配符</h2><p>除了用 <T>表示泛型外，还有 &lt;?&gt;这种形式。？ 被称为通配符。</p>
+<p>Sub 是 Base 的子类，不代表 List<Sub>和 List<Base>有继承关系。<br>通配符的出现是为了指定泛型中的类型范围。</p>
+<p>通配符有 3 种形式：</p>
+<ol>
+<li>&lt;?&gt;被称作无限定的通配符。</li>
+<li>&lt;? extends T&gt;被称作有上限的通配符。</li>
+<li>&lt;? super T&gt;被称作有下限的通配符。</li>
+</ol>
+<h3 id="5-1-无限定通配符"><a href="#5-1-无限定通配符" class="headerlink" title="5.1 无限定通配符"></a>5.1 无限定通配符</h3><p>如果使用“？“接收泛型对象的时候，则不能设置被泛型指定的内容。</p>
+<h3 id="5-2-有上限通配符"><a href="#5-2-有上限通配符" class="headerlink" title="5.2 有上限通配符"></a>5.2 有上限通配符</h3><p>函数参数List&lt;? extends Parent&gt;，则传入参数的时候必须传入List<Parent>实例或者List&lt;Parent子类&gt;的实例。</p>
+<h3 id="5-3-有下限通配符"><a href="#5-3-有下限通配符" class="headerlink" title="5.3 有下限通配符"></a>5.3 有下限通配符</h3><p>函数参数List&lt;? extends Sub&gt;，则传入参数的时候必须传入List<Sub>实例或者List&lt;Sub父类&gt;的实例。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java 泛型</tag>
+      </tags>
+  </entry>
+</search>
