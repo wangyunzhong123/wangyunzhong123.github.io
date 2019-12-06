@@ -331,6 +331,306 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/06/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%EF%BC%8C%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="hanks-wang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/haqi.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="hanks-wang">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/06/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%EF%BC%8C%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" itemprop="url">分布式事务，解决方案</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-06T23:02:42+08:00">
+                2019-12-06
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2019-12-06T23:03:40+08:00">
+                2019-12-06
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F-%E4%BA%8B%E5%8A%A1/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式 事务</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/06/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%EF%BC%8C%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/12/06/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%EF%BC%8C%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.7k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  9 分钟
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><a href="http://www.cnblogs.com/savorboard/p/distributed-system-transaction-consistency.html" target="_blank" rel="noopener">聊聊分布式事务，再说说解决方案</a><br><a href="https://blog.csdn.net/weixin_40533111/article/details/85069536" target="_blank" rel="noopener">分布式事务CAP理解论证-解决方案</a><br><a href="https://matt33.com/2018/07/08/distribute-system-consistency-protocol/" target="_blank" rel="noopener">分布式系统的2PC、3PC详细分析</a><br><a href="https://github.com/changmingxie/tcc-transaction" target="_blank" rel="noopener">github tcc示例</a><br><a href="https://juejin.im/post/5dda9e7e6fb9a07aae2a3778" target="_blank" rel="noopener">分布式事务、重复消费、顺序消费</a></p>
+<h2 id="一、理论"><a href="#一、理论" class="headerlink" title="一、理论"></a>一、理论</h2><h3 id="CAP相关："><a href="#CAP相关：" class="headerlink" title="CAP相关："></a>CAP相关：</h3><p>CAP与BASE相关：<a href="https://wangyunzhong123.github.io/2019/12/01/%E5%88%86%E5%B8%83%E5%BC%8FCAP%E4%B8%8EBASE%E7%90%86%E8%AE%BA/" target="_blank" rel="noopener">我的博客</a></p>
+<p>而对于分布式中的问题的解决方案,CAP原则出现,描述如下:</p>
+<p>一致性(Consistency):</p>
+<p>像A节点写入一条信息之后,同一时刻,在其他节点都可以读到这条信息</p>
+<p>可用性(Availability):</p>
+<p>多布一些节点A,B,C…,任何时刻,用户访问,都应该以可预期的结果返回,而不是浏览器报错,404,500,页面丢失…等用户体验不好的情况发生</p>
+<p>分区容忍性(PartitionTolerance):</p>
+<p>当各系统模块间通信出现问题时,设计一个策略,使系统仍可对外提供满足一致性或可用性</p>
+<p>刚接触cap时,有些不理解分区容忍性,我们自己倒推一下:</p>
+<ol>
+<li>为了保证一致性,我们需要各个节点同步消息</li>
+<li>为了保证可用性我们可以多部署节点,部分节点挂了仍可对外提供服务</li>
+<li>为了保证分区容忍性:此刻卡壳了,怎么做?没了一种具体的方式,然而他还是客观存在的。后来发现:进入了思维盲点:只要在分布式场景中,分区必然存在,那么如果不处理分区发生时的情况,节点无法通讯时会发生什么?–此刻如果仍对外提供服务,那么导致无法同步消息,即保证不了强一致性;如果要保证强一致性,那么就需要节点阻塞,一直等待通讯恢复,即保证不了可用性.</li>
+</ol>
+<p>所以分区容忍性就是:当发生分区问题时,我们使用策略,在一致性和可用性二者间选择<br>注意: 无法通信包括网络问题,或者节点机器宕机</p>
+<p>误区: CAP理论中说三者不可兼得,但实际情况是,在分布式场景中分区一定存在,即必须有分区容忍性对应的策略,之后才能在一致性和可用性间二者之间选择.所以对主流架构来说不是三选二,而是二选一。</p>
+<h3 id="对P的理解"><a href="#对P的理解" class="headerlink" title="对P的理解"></a>对P的理解</h3><p>很多人可能对分区容忍性不太理解，知乎有一个回答对这个解释的比较清楚<a href="https://www.zhihu.com/question/54105974" target="_blank" rel="noopener">CAP理论中的P到底是个什么意思？</a>，这里引用一下：</p>
+<ul>
+<li>一个分布式系统里面，节点组成的网络本来应该是连通的。然而可能因为一些故障，使得有些节点之间不连通了，整个网络就分成了几块区域。数据就散布在了这些不连通的区域中。这就叫分区。</li>
+<li>当你一个数据项只在一个节点中保存，那么分区出现后，和这个节点不连通的部分就访问不到这个数据了。这时分区就是无法容忍的。</li>
+<li>提高分区容忍性的办法就是一个数据项复制到多个节点上，那么出现分区之后，这一数据项就可能分布到各个区里，容忍性就提高了。</li>
+<li>然而，要把数据复制到多个节点，就会带来一致性的问题，就是多个节点上面的数据可能是不一致的。</li>
+<li>要保证一致，每次写操作就都要等待全部节点写成功，而这等待又会带来可用性的问题。</li>
+<li>总的来说就是，数据存在的节点越多，分区容忍性越高，但要复制更新的数据就越多，一致性就越难保证。为了保证一致性，更新所有节点数据所需要的时间就越长，可用性就会降低。</li>
+</ul>
+<h3 id="XA规范："><a href="#XA规范：" class="headerlink" title="XA规范："></a>XA规范：</h3><p><a href="http://www.jasongj.com/big_data/two_phase_commit/" target="_blank" rel="noopener">http://www.jasongj.com/big_data/two_phase_commit/</a><br><a href="https://www.cnblogs.com/zhoujinyi/p/5257558.html" target="_blank" rel="noopener">https://www.cnblogs.com/zhoujinyi/p/5257558.html</a></p>
+<p>XA规范中，事务管理器主要通过以下的接口对资源管理器进行管理</p>
+<ul>
+<li>xa_open，xa_close：建立和关闭与资源管理器的连接。</li>
+<li>xa_start，xa_end：开始和结束一个本地事务。</li>
+<li>xa_prepare，xa_commit，xa_rollback：预提交、提交和回滚一个本地事务。</li>
+<li>xa_recover：回滚一个已进行预提交的事务。</li>
+</ul>
+<p>XA规范：<a href="https://www.cnblogs.com/wt645631686/p/10882998.html" target="_blank" rel="noopener">https://www.cnblogs.com/wt645631686/p/10882998.html</a></p>
+<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p><a href="https://blog.csdn.net/weixin_40533111/article/details/85069536" target="_blank" rel="noopener">一些具体实现</a></p>
+<ul>
+<li>维护本地消息表</li>
+<li>使用rocketmq事务消息：<a href="https://blog.csdn.net/weixin_40533111/article/details/84451219" target="_blank" rel="noopener">https://blog.csdn.net/weixin_40533111/article/details/84451219</a></li>
+<li>两阶段提交协议(2PC)</li>
+<li>TCC事务补偿机制</li>
+</ul>
+<h4 id="使用限制："><a href="#使用限制：" class="headerlink" title="使用限制："></a>使用限制：</h4><p>a. XA事务和本地事务以及锁表操作是互斥的</p>
+<p>开启了xa事务就无法使用本地事务和锁表操作:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">mysql&gt; xa start &#39;t1xa&#39;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Query OK, 0 rows affected (0.04 sec)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">mysql&gt; begin;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">ERROR 1399 (XAE07): XAER_RMFAIL: The command cannot be executed when global transaction is in the ACTIVE state</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">mysql&gt; lock table t1 read;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">ERROR 1399 (XAE07): XAER_RMFAIL: The command cannot be executed when global transaction is in the ACTIVE state</span></pre></td></tr></table></figure>
+<p>开启了本地事务就无法使用xa事务:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">mysql&gt; begin;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Query OK, 0 rows affected (0.00 sec)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">mysql&gt; xa start &#39;rrrr&#39;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">ERROR 1400 (XAE09): XAER_OUTSIDE: Some work is done outside global transaction</span></pre></td></tr></table></figure>
+
+<p>b. xa start 之后必须xa end， 否则不能执行xa commit 和xa rollback</p>
+<p>所以如果在执行xa事务过程中有语句出错了，你也需要先xa end一下，然后才能xarollback。</p>
+<p>注意事项:</p>
+<p>a. mysql只是提供了xa事务的接口，分布式事务中的mysql实例之间是互相独立的不感知的。 所以用户必须<br>自己实现分布式事务的调度器<br>b. xa事务有一些使用上的bug， 参考<a href="http://www.mysqlops.com/2012/02/24/mysql-xa-optimize.html" target="_blank" rel="noopener">http://www.mysqlops.com/2012/02/24/mysql-xa-optimize.html</a></p>
+<p>主要是:<br>“MySQL数据库的主备数据库的同步，通过Binlog的复制完成。而Binlog是MySQL数据库内部XA事务的协调者，并且MySQL数据库为binlog做了优化——binlog不写prepare日志，只写commit日志。<br>所有的参与节点prepare完成，在进行xa commit前crash。crash recover如果选择commit此事务。由于binlog在prepare阶段未写，因此主库中看来，此分布式事务最终提交了，但是此事务的操作并未 写到binlog中，因此也就未能成功复制到备库，从而导致主备库数据不一致的情况出现。<br>而crash recover如果选rollback, 那么就会出现全局不一致（该分布式事务对应的节点，部分已经提交，无法回滚，而部分节点回滚。最终导致同一分布式事务，在各参与节点，最终状态不一致）”</p>
+<p>参考的那篇blog中给出的办法是修改mysql代码，这个无法在DBScale中使用。 所以可选的替代方案是不使用<br>主从复制进行备份，而是直接使用xa事务实现同步写来作为备份。</p>
+<h2 id="二、两阶段提交2PC"><a href="#二、两阶段提交2PC" class="headerlink" title="二、两阶段提交2PC"></a>二、两阶段提交2PC</h2><h3 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a>1. 介绍</h3><p><img src="https://tvax3.sinaimg.cn/large/9ea5011cly1g9hg6hrqy1j20f308r74r.jpg" alt=""></p>
+<p>两个角色：</p>
+<ol>
+<li>协调者</li>
+<li>参与者</li>
+</ol>
+<p>两个阶段：</p>
+<ol>
+<li>阶段一：提交事务请求</li>
+<li>阶段二：执行事务提交</li>
+</ol>
+<p>牺牲了一部分可用性来换取的一致性。解决方案有：springboot+Atomikos or Bitronix</p>
+<p>优点： 原理简单，实现方便</p>
+<p>缺点： </p>
+<ol>
+<li>同步阻塞：在提交的过程中，所有参与者都处于阻塞状态，大大降低并发度</li>
+<li>单点问题：一旦协调者出现问题，则所有参与者处于锁定状态，无法对外服务</li>
+<li>数据不一致：在阶段二，协调者发送了commit之后，发生了局部网络异常或者协调者尚未发送完commit请求就宕机了，导致部分参与者收到commit，导致系统出现不一致</li>
+<li>太过保守：协调者在阶段一中，参与者出现故障而导致协调者无法获取到所有参与者的响应，协调者只能依靠超时时间来判断是否中断事务。换句话说，没有完善的容错机制。</li>
+</ol>
+<h3 id="2-实现"><a href="#2-实现" class="headerlink" title="2. 实现"></a>2. 实现</h3><p>JTA（Java Transaction API）定义了对XA事务的支持。像很多其他的Java规范一样，JTA仅仅定义了接口，具体的实现则是由供应商(如J2EE厂商)负责提供，目前JTA的实现主要有以下几种：</p>
+<ul>
+<li>J2EE容器所提供的JTA实现(如JBoss)。</li>
+<li>独立的JTA实现：如JOTM（Java Open Transaction Manager），Atomikos。这些实现可以应用在那些不使用J2EE应用服务器的环境里用以提供分布事事务保证。</li>
+</ul>
+<p>MySQL中的XA实现分为：外部XA和内部XA。前者是指我们通常意义上的分布式事务实现；后者是指单台MySQL服务器中，Server层作为TM(事务协调者)，而服务器中的多个数据库实例作为RM，而进行的一种分布式事务，也就是MySQL跨库事务；也就是一个事务涉及到同一条MySQL服务器中的两个innodb数据库(因为其它引擎不支持XA)。</p>
+<h2 id="三、三阶段提交3PC"><a href="#三、三阶段提交3PC" class="headerlink" title="三、三阶段提交3PC"></a>三、三阶段提交3PC</h2><p>是二阶段的改进版，将二阶段的提交事务请求过程一分为二，形成了：</p>
+<ol>
+<li>CanCommit：协调者发送事务询问、参与者反馈</li>
+<li>PreCommit：协调者发送预提交请求、参与者事务预提交（执行事务操作，写undo、redo日志）、参与者响应</li>
+<li>doCommit：协调者发送提交请求、参与者事务提交（事务提交，释放资源）、参与者响应</li>
+</ol>
+<p>在阶段二中，参与者可能会响应no，或者协调者等待超时时间后还无法收到所有参与者的反馈，则中断事务：协调者向所有参与者发送abort请求。参与者无论是收到协调者的abort请求，或者等待协调者请求过程中超时，都会中断事务。</p>
+<p>在阶段三中，如果有任一参与者发送了no，或者等待超时后协调者还没收到所有参与者的反馈，则中断事务。需要注意的事，进入阶段三，可能会有下面两种故障：</p>
+<ul>
+<li>协调者出现问题</li>
+<li>协调者、参与者之间的网络出现问题</li>
+</ul>
+<p>无论哪种情况，都会导致参与者无法及时收到来自协调者的doCommit或者abort请求，这种情况，参与者在等待超时后继续进行事务提交。</p>
+<p>优点：</p>
+<ol>
+<li>降低了参与者的阻塞范围（二阶段中如果参与者与协调者断开，参与者abort；三阶段，提交），并且能够在单点故障后继续达成一致。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>参与者在收到preCommit后出现网络分区，参与者依然会提交事务，会造成不一致。</li>
+</ol>
+<h2 id="四、实现"><a href="#四、实现" class="headerlink" title="四、实现"></a>四、实现</h2><p>todo</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    <div>
+      
+    </div>
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/01/%E5%88%86%E5%B8%83%E5%BC%8FCAP%E4%B8%8EBASE%E7%90%86%E8%AE%BA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1617,7 +1917,7 @@
               
                 <a href="/archives%7C%7C%20archive">
               
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1639,7 +1939,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
