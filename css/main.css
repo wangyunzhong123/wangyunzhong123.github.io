@@ -489,7 +489,7 @@ pre,
   font-size: 13px;
   color: #c5c8c6;
   background: #1d1f21;
-  line-height: 1.6;
+  line-height: 0.3;
 }
 pre,
 code {
@@ -2056,7 +2056,7 @@ img:hover {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #6e6155;
+  background: #ffcff2;
 }
 .links-of-blogroll {
   font-size: 13px;
