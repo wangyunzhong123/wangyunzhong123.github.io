@@ -1,6 +1,417 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>ES-索引管理</title>
+    <url>/2019/12/16/ES-%E7%B4%A2%E5%BC%95%E7%AE%A1%E7%90%86/</url>
+    <content><![CDATA[<p>参考：<br><a href="https://es.xiaoleilu.com/070_Index_Mgmt/00_Intro.html" target="_blank" rel="noopener">https://es.xiaoleilu.com/070_Index_Mgmt/00_Intro.html</a></p>
+<h2 id="创建索引"><a href="#创建索引" class="headerlink" title="创建索引"></a>创建索引</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;new_index</span></pre></td></tr></table></figure>
+
+<p>创建更多详细设置的索引：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr></table></figure>
+
+<h2 id="删除索引"><a href="#删除索引" class="headerlink" title="删除索引"></a>删除索引</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DELTE &#x2F;new_index</span></pre></td></tr></table></figure>
+
+<h2 id="索引设置"><a href="#索引设置" class="headerlink" title="索引设置"></a>索引设置</h2><p>两个最重要的设置：</p>
+<p>number_of_shards<br>定义一个索引的主分片个数，默认值是 <code>5</code>。这个配置在索引创建后不能修改。</p>
+<p>number_of_replicas<br>每个主分片的复制分片个数，默认是 <code>1</code>。这个配置可以随时在活跃的索引上修改。</p>
+<p>例如，我们可以创建只有一个主分片，没有复制分片的小索引。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_temp_index</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;settings&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;number_of_shards&quot; :   1,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;number_of_replicas&quot; : 0</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>然后，我们可以用 update-index-settings API 动态修改复制分片个数：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_temp_index&#x2F;_settings</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;number_of_replicas&quot;: 1</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h2 id="配置分析器"><a href="#配置分析器" class="headerlink" title="配置分析器"></a>配置分析器</h2><p>设置 analysis 部分，用来配置已存在的分析器或创建自定义分析器来定制化你的索引。</p>
+<p>standard 分析器是用于全文字段的默认分析器，对于大部分西方语系来说是一个不错的选择。它考虑了以下几点：</p>
+<ul>
+<li>standard 分词器，在词层级上分割输入的文本。</li>
+<li>standard 标记过滤器，被设计用来整理分词器触发的所有标记（但是目前什么都没做）。</li>
+<li>lowercase 标记过滤器，将所有标记转换为小写。</li>
+<li>stop 标记过滤器，删除所有可能会造成搜索歧义的停用词，如 a，the，and，is。</li>
+</ul>
+<p>默认情况下，停用词过滤器是被禁用的。如需启用它，你可以通过创建一个基于 standard 分析器的自定义分析器，并且设置 stopwords 参数。可以提供一个停用词列表，或者使用一个特定语言的预定停用词列表。</p>
+<p>在下面的例子中，我们创建了一个新的分析器，叫做 es_std，并使用预定义的西班牙语停用词：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;spanish_docs</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;settings&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;analysis&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;analyzer&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;es_std&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;type&quot;:      &quot;standard&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;stopwords&quot;: &quot;_spanish_&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>es_std 分析器不是全局的，它仅仅存在于我们定义的 spanish_docs 索引中。为了用 analyze API 来测试它，我们需要使用特定的索引名。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;spanish_docs&#x2F;_analyze?analyzer&#x3D;es_std</span></pre></td></tr><tr><td class="code"><pre><span class="line">El veloz zorro marrón</span></pre></td></tr></table></figure>
+<p>注:es7.5版本下上面的api is invalid。</p>
+<p>下面简化的结果中显示停用词 El 被正确的删除了：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">  &quot;tokens&quot; : [</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#123; &quot;token&quot; :    &quot;veloz&quot;,   &quot;position&quot; : 2 &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#123; &quot;token&quot; :    &quot;zorro&quot;,   &quot;position&quot; : 3 &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#123; &quot;token&quot; :    &quot;marrón&quot;,  &quot;position&quot; : 4 &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">  ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h2 id="自定义分词器"><a href="#自定义分词器" class="headerlink" title="自定义分词器"></a>自定义分词器</h2><p>分析器 是三个顺序执行的组件的结合（字符过滤器，分词器，标记过滤器）。</p>
+<h3 id="字符过滤器"><a href="#字符过滤器" class="headerlink" title="字符过滤器"></a>字符过滤器</h3><p>字符过滤器是让字符串在被分词前变得更加“整洁”。例如，如果我们的文本是 HTML 格式，它可能会包含一些我们不想被索引的 HTML 标签，诸如 <p> 或 <div>。</p>
+<p>我们可以使用 html_strip 字符过滤器 来删除所有的 HTML 标签，并且将 HTML 实体转换成对应的 Unicode 字符，比如将 &Aacute; 转成 Á。<br>一个分析器可能包含零到多个字符过滤器。</p>
+<h3 id="分词器"><a href="#分词器" class="headerlink" title="分词器"></a>分词器</h3><p>一个分析器 必须 包含一个分词器。分词器将字符串分割成单独的词（terms）或标记（tokens）。standard 分析器使用 standard 分词器将字符串分割成单独的字词，删除大部分标点符号，但是现存的其他分词器会有不同的行为特征。</p>
+<p>例如，keyword 分词器输出和它接收到的相同的字符串，不做任何分词处理。[whitespace 分词器]只通过空格来分割文本。[pattern 分词器]可以通过正则表达式来分割文本。</p>
+<h3 id="标记过滤器"><a href="#标记过滤器" class="headerlink" title="标记过滤器"></a>标记过滤器</h3><p>分词结果的 标记流 会根据各自的情况，传递给特定的标记过滤器。</p>
+<p>标记过滤器可能修改，添加或删除标记。我们已经提过 lowercase 和 stop 标记过滤器，但是 Elasticsearch 中有更多的选择。stemmer 标记过滤器将单词转化为他们的根形态（root form）。ascii_folding 标记过滤器会删除变音符号，比如从 très 转为 tres。 ngram 和 edge_ngram 可以让标记更适合特殊匹配情况或自动完成。</p>
+<h3 id="创建自定义分词器"><a href="#创建自定义分词器" class="headerlink" title="创建自定义分词器"></a>创建自定义分词器</h3><p>与索引设置一样，我们预先配置好 es_std 分析器，我们可以再 analysis 字段下配置字符过滤器，分词器和标记过滤器：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;settings&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;analysis&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;char_filter&quot;: &#123; ... custom character filters ... &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;tokenizer&quot;:   &#123; ...    custom tokenizers     ... &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;filter&quot;:      &#123; ...   custom token filters   ... &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;analyzer&quot;:    &#123; ...    custom analyzers      ... &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>作为例子，我们来配置一个这样的分析器：</p>
+<ul>
+<li>用 html_strip 字符过滤器去除所有的 HTML 标签</li>
+<li>将 &amp; 替换成 and，使用一个自定义的 mapping 字符过滤器</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;char_filter&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;&amp;_to_and&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;type&quot;:       &quot;mapping&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;mappings&quot;: [ &quot;&amp;&#x3D;&gt; and &quot;]</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<ol>
+<li>使用 standard 分词器分割单词</li>
+<li>使用 lowercase 标记过滤器将词转为小写</li>
+<li>用 stop 标记过滤器去除一些自定义停用词。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;filter&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;my_stopwords&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;type&quot;:        &quot;stop&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;stopwords&quot;: [ &quot;the&quot;, &quot;a&quot; ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>根据以上描述来将预定义好的分词器和过滤器组合成我们的分析器：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;analyzer&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;my_analyzer&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;type&quot;:           &quot;custom&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;char_filter&quot;:  [ &quot;html_strip&quot;, &quot;&amp;_to_and&quot; ],</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;tokenizer&quot;:      &quot;standard&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;filter&quot;:       [ &quot;lowercase&quot;, &quot;my_stopwords&quot; ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>用下面的方式可以将以上请求合并成一条：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;settings&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;analysis&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;char_filter&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;&amp;_to_and&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;type&quot;:       &quot;mapping&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;mappings&quot;: [ &quot;&amp;&#x3D;&gt; and &quot;]</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;filter&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;my_stopwords&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;type&quot;:       &quot;stop&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;stopwords&quot;: [ &quot;the&quot;, &quot;a&quot; ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;analyzer&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;my_analyzer&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;type&quot;:         &quot;custom&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;char_filter&quot;:  [ &quot;html_strip&quot;, &quot;&amp;_to_and&quot; ],</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;tokenizer&quot;:    &quot;standard&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;filter&quot;:       [ &quot;lowercase&quot;, &quot;my_stopwords&quot; ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;&#125;&#125;</span></pre></td></tr></table></figure>
+
+<p>创建索引后，用 analyze API 来测试新的分析器：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;my_index&#x2F;_analyze?analyzer&#x3D;my_analyzer</span></pre></td></tr><tr><td class="code"><pre><span class="line">The quick &amp; brown fox</span></pre></td></tr></table></figure>
+<p>注:es版本7.5下上面的语句is invalid。</p>
+<p>下面的结果证明我们的分析器能正常工作了：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">  &quot;tokens&quot; : [</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &#123; &quot;token&quot; :   &quot;quick&quot;,    &quot;position&quot; : 2 &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &#123; &quot;token&quot; :   &quot;and&quot;,      &quot;position&quot; : 3 &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &#123; &quot;token&quot; :   &quot;brown&quot;,    &quot;position&quot; : 4 &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &#123; &quot;token&quot; :   &quot;fox&quot;,      &quot;position&quot; : 5 &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>除非我们告诉 Elasticsearch 在哪里使用，否则分析器不会起作用。我们可以通过下面的映射将它应用在一个 string 类型的字段上：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index&#x2F;_mapping</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;properties&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;title&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;type&quot;:      &quot;string&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;analyzer&quot;:  &quot;my_analyzer&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h2 id="类型"><a href="#类型" class="headerlink" title="类型"></a>类型</h2><h3 id="Lucene-如何处理文档"><a href="#Lucene-如何处理文档" class="headerlink" title="Lucene 如何处理文档"></a>Lucene 如何处理文档</h3><p>Lucene 中，一个文档由一组简单的键值对组成，一个字段至少需要有一个值，但是任何字段都可以有多个值。类似的，一个单独的字符串可能在分析过程中被转换成多个值。Lucene 不关心这些值是字符串，数字或日期，所有的值都被当成 不透明字节</p>
+<p>当我们在 Lucene 中索引一个文档时，每个字段的值都被加到相关字段的倒排索引中。你也可以选择将原始数据 储存 起来以备今后取回。</p>
+<h3 id="类型是怎么实现的"><a href="#类型是怎么实现的" class="headerlink" title="类型是怎么实现的"></a>类型是怎么实现的</h3><p>Elasticsearch 类型是在这个简单基础上实现的。一个索引可能包含多个类型，每个类型有各自的映射和文档，保存在同一个索引中。</p>
+<p>因为 Lucene 没有文档类型的概念，每个文档的类型名被储存在一个叫 _type 的元数据字段上。当我们搜索一种特殊类型的文档时，Elasticsearch 简单的通过 _type 字段来过滤出这些文档。</p>
+<p>Lucene 同样没有映射的概念。映射是 Elasticsearch 将复杂 JSON 文档映射成 Lucene 需要的扁平化数据的方式。</p>
+<p>例如，user 类型中 name 字段的映射声明这个字段是一个 string 类型，在被加入倒排索引之前，它的数据需要通过 whitespace 分析器来分析。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;name&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;type&quot;:     &quot;string&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;analyzer&quot;: &quot;whitespace&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="预防类型陷阱"><a href="#预防类型陷阱" class="headerlink" title="预防类型陷阱"></a>预防类型陷阱</h3><p>事实上不同类型的文档可以被加到同一个索引里带来了一些预想不到的困难。</p>
+<p>想象一下我们的索引中有两种类型：blog_en 表示英语版的博客，blog_es 表示西班牙语版的博客。两种类型都有 title 字段，但是其中一种类型使用 english 分析器，另一种使用 spanish 分析器。</p>
+<p>使用下面的查询就会遇到问题：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;match&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;title&quot;: &quot;The quick brown fox&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>我们在两种类型中搜索 title 字段，首先需要分析查询语句，但是应该使用哪种分析器呢，spanish 还是 english？Elasticsearch 会采用第一个被找到的 title 字段使用的分析器，这对于这个字段的文档来说是正确的，但对另一个来说却是错误的。</p>
+<p>我们可以通过给字段取不同的名字来避免这种错误 —— 比如，用 title_en 和 title_es。或者在查询中明确包含各自的类型名。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;multi_match&quot;: &#123; &lt;1&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;query&quot;:    &quot;The quick brown fox&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;fields&quot;: [ &quot;blog_en.title&quot;, &quot;blog_es.title&quot; ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>&lt;1&gt; multi_match 查询在多个字段上执行 match 查询并一起返回结果。<br>新的查询中 english 分析器用于 blog_en.title 字段，spanish 分析器用于 blog_es.title 字段，然后通过综合得分组合两种字段的结果。</p>
+<p>这种办法对具有相同数据类型的字段有帮助，但是想象一下如果你将下面两个文档加入同一个索引，会发生什么：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">类型: user</span></pre></td></tr><tr><td class="code"><pre><span class="line"> &#123; &quot;login&quot;: &quot;john_smith&quot; &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">类型: event</span></pre></td></tr><tr><td class="code"><pre><span class="line"> &#123; &quot;login&quot;: &quot;2014-06-01&quot; &#125;</span></pre></td></tr></table></figure>
+
+<p>Lucene 不在乎一个字段是字符串而另一个字段是日期，它会一视同仁的索引这两个字段。</p>
+<p>然而，假如我们试图 排序 event.login 字段，Elasticsearch 需要将 login 字段的值加载到内存中,它将 任意文档 的值加入索引而不管它们的类型。</p>
+<p>它会尝试加载这些值为字符串或日期，取决于它遇到的第一个 login 字段。这可能会导致预想不到的结果或者以失败告终。</p>
+<p>提示：为了保证你不会遇到这些冲突，建议在同一个索引的每一个类型中，确保用同样的方式映射同名的字段</p>
+<h2 id="元数据：-source-字段"><a href="#元数据：-source-字段" class="headerlink" title="元数据：_source 字段"></a>元数据：_source 字段</h2><p>默认情况下，Elasticsearch 用 JSON 字符串来表示文档主体保存在 _source 字段中。像其他保存的字段一样，_source 字段也会在写入硬盘前压缩。</p>
+<p>这几乎始终是需要的功能，因为：</p>
+<ul>
+<li>搜索结果中能得到完整的文档 —— 不需要额外去别的数据源中查询文档</li>
+<li>如果缺少 _source 字段，部分 更新 请求不会起作用</li>
+<li>当你的映射有变化，而且你需要重新索引数据时，你可以直接在 Elasticsearch 中操作而不需要重新从别的数据源中取回数据。</li>
+<li>你可以从 _source 中通过 get 或 search 请求取回部分字段，而不是整个文档。</li>
+<li>这样更容易排查错误，因为你可以准确的看到每个文档中包含的内容，而不是只能从一堆 ID 中猜测他们的内容。</li>
+</ul>
+<p>即便如此，存储 _source 字段还是要占用硬盘空间的。假如上面的理由对你来说不重要，你可以用下面的映射禁用 _source 字段：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;mappings&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;my_type&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;_source&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;enabled&quot;:  false</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>在搜索请求中你可以通过限定 _source 字段来请求指定字段：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;query&quot;:   &#123; &quot;match_all&quot;: &#123;&#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;_source&quot;: [ &quot;title&quot;, &quot;created&quot; ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>这些字段会从 _source 中提取出来，而不是返回整个 _source 字段。</p>
+<p>储存字段</p>
+<p>除了索引字段的值，你也可以选择 储存 字段的原始值以备日后取回。使用 Lucene 做后端的用户用储存字段来选择搜索结果的返回值，事实上，_source 字段就是一个储存字段。</p>
+<p>在 Elasticsearch 中，单独设置储存字段不是一个好做法。完整的文档已经被保存在 _source 字段中。通常最好的办法会是使用 _source 参数来过滤你需要的字段。</p>
+<h2 id="元数据：-all-字段"><a href="#元数据：-all-字段" class="headerlink" title="元数据：_all 字段"></a>元数据：_all 字段</h2><p> _all 字段：一个所有其他字段值的特殊字符串字段。query_string 在没有指定字段时默认用 _all 字段查询。</p>
+<p>_all 字段在新应用的探索阶段比较管用，当你还不清楚最终文档的结构时，可以将任何查询用于这个字段，就有机会得到你想要的文档：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;match&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;_all&quot;: &quot;john smith marketing&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>随着你应用的发展，搜索需求会变得更加精准。你会越来越少的使用 _all 字段。_all 是一种简单粗暴的搜索方式。通过查询独立的字段，你能更灵活，强大和精准的控制搜索结果，提高相关性。<br>提示</p>
+<p>【相关性算法】考虑的一个最重要的原则是字段的长度：字段越短，就越重要。在较短的 title 字段中的短语会比较长的 content 字段中的短语显得更重要。而字段间的这种差异在 _all 字段中就不会出现</p>
+<p>如果你决定不再使用 _all 字段，你可以通过下面的映射禁用它：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index&#x2F;_mapping&#x2F;my_type</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;my_type&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;_all&quot;: &#123; &quot;enabled&quot;: false &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>通过 include_in_all 选项可以控制字段是否要被包含在 _all 字段中，默认值是 true。在一个对象上设置 include_in_all 可以修改这个对象所有字段的默认行为。</p>
+<p>你可能想要保留 _all 字段来查询所有特定的全文字段，例如 title, overview, summary 和 tags。相对于完全禁用 _all 字段，你可以先默认禁用 include_in_all 选项，而选定字段上启用 include_in_all。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index&#x2F;my_type&#x2F;_mapping</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;my_type&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;include_in_all&quot;: false,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;properties&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;title&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;type&quot;:           &quot;string&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;include_in_all&quot;: true</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            ...</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>谨记 _all 字段仅仅是一个经过分析的 string 字段。它使用默认的分析器来分析它的值，而不管这值本来所在的字段指定的分析器。而且像所有 string 类型字段一样，你可以配置 _all 字段使用的分析器：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index&#x2F;my_type&#x2F;_mapping</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;my_type&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;_all&quot;: &#123; &quot;analyzer&quot;: &quot;whitespace&quot; &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h2 id="文档-ID"><a href="#文档-ID" class="headerlink" title="文档 ID"></a>文档 ID</h2><p>文档唯一标识由四个元数据字段组成：</p>
+<ul>
+<li>_id：文档的字符串 ID</li>
+<li>_type：文档的类型名</li>
+<li>_index：文档所在的索引</li>
+<li>_uid：_type 和 _id 连接成的 type#id</li>
+</ul>
+<p>默认情况下，_uid 是被保存（可取回）和索引（可搜索）的。_type 字段被索引但是没有保存，_id 和 _index 字段则既没有索引也没有储存，它们并不是真实存在的。</p>
+<p>尽管如此，你仍然可以像真实字段一样查询 _id 字段。Elasticsearch 使用 _uid 字段来追溯 _id。虽然你可以修改这些字段的 index 和 store 设置，但是基本上不需要这么做。</p>
+<p>_id 字段有一个你可能用得到的设置：path 设置告诉 Elasticsearch 它需要从文档本身的哪个字段中生成 _id</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;mappings&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;my_type&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;_id&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;path&quot;: &quot;doc_id&quot; &lt;1&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;properties&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;doc_id&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;type&quot;:   &quot;string&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;index&quot;:  &quot;not_analyzed&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+<p>&lt;1&gt; 从 doc_id 字段生成 _id</p>
+<p>然后，当你索引一个文档时：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST &#x2F;my_index&#x2F;my_type</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;doc_id&quot;: &quot;123&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>_id 值由文档主体的 doc_id 字段生成。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;_index&quot;:   &quot;my_index&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;_type&quot;:    &quot;my_type&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;_id&quot;:      &quot;123&quot;, &lt;1&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;_version&quot;: 1,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;created&quot;:  true</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+<p>&lt;1&gt; _id 正确的生成了。</p>
+<p>警告：虽然这样很方便，但是注意它对 bulk 请求（见【bulk 格式】）有个轻微的性能影响。处理请求的节点将不能仅靠解析元数据行来决定将请求分配给哪一个分片，而需要解析整个文档主体。</p>
+<h2 id="动态映射"><a href="#动态映射" class="headerlink" title="动态映射"></a>动态映射</h2><p>当 Elasticsearch 处理一个位置的字段时，它通过【动态映射】来确定字段的数据类型且自动将该字段加到类型映射中。</p>
+<p>有时这是理想的行为，有时却不是。或许你不知道今后会有哪些字段加到文档中，但是你希望它们能自动被索引。或许你仅仅想忽略它们。特别是当你使用 Elasticsearch 作为主数据源时，你希望未知字段能抛出一个异常来警示你。</p>
+<p>幸运的是，你可以通过 dynamic 设置来控制这些行为，它接受下面几个选项：</p>
+<ul>
+<li>true：自动添加字段（默认）</li>
+<li>false：忽略字段</li>
+<li>strict：当遇到未知字段时抛出异常</li>
+</ul>
+<p>dynamic 设置可以用在根对象或任何 object 对象上。你可以将 dynamic 默认设置为 strict，而在特定内部对象上启用它：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;mappings&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;my_type&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;dynamic&quot;:      &quot;strict&quot;, &lt;1&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;properties&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;title&quot;:  &#123; &quot;type&quot;: &quot;string&quot;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;stash&quot;:  &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;type&quot;:     &quot;object&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;dynamic&quot;:  true &lt;2&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>&lt;1&gt; 当遇到未知字段时，my_type 对象将会抛出异常<br>&lt;2&gt; stash 对象会自动创建字段</p>
+<p>通过这个映射，你可以添加一个新的可搜索字段到 stash 对象中：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index&#x2F;my_type&#x2F;1</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;title&quot;:   &quot;This doc adds a new field&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;stash&quot;: &#123; &quot;new_field&quot;: &quot;Success!&quot; &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+<p>但是在顶层做同样的操作则会失败：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index&#x2F;my_type&#x2F;1</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;title&quot;:     &quot;This throws a StrictDynamicMappingException&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;new_field&quot;: &quot;Fail!&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>备注：将 dynamic 设置成 false 完全不会修改 _source 字段的内容。_source 将仍旧保持你索引时的完整 JSON 文档。然而，没有被添加到映射的未知字段将不可被搜索。</p>
+<h2 id="自定义动态索引"><a href="#自定义动态索引" class="headerlink" title="自定义动态索引"></a>自定义动态索引</h2><p>如果你想在运行时的增加新的字段，你可能会开启动态索引。虽然有时动态映射的 规则 显得不那么智能，幸运的是我们可以通过设置来自定义这些规则。</p>
+<h3 id="日期检测"><a href="#日期检测" class="headerlink" title="日期检测"></a>日期检测</h3><p>当 Elasticsearch 遇到一个新的字符串字段时，它会检测这个字段是否包含一个可识别的日期，比如 2014-01-01。如果它看起来像一个日期，这个字段会被作为 date 类型添加，否则，它会被作为 string 类型添加。</p>
+<p>有些时候这个规则可能导致一些问题。想象你有一个文档长这样：</p>
+<p>{ “note”: “2014-01-01” }</p>
+<p>假设这是第一次见到 note 字段，它会被添加为 date 字段，但是如果下一个文档像这样：</p>
+<p>{ “note”: “Logged out” }</p>
+<p>这显然不是一个日期，但为时已晚。这个字段已经被添加为日期类型，这个 不合法的日期 将引发异常。</p>
+<p>日期检测可以通过在根对象上设置 date_detection 为 false 来关闭：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;mappings&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;my_type&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;date_detection&quot;: false</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>使用这个映射，字符串将始终是 string 类型。假如你需要一个 date 字段，你得手动添加它。</p>
+<p>提示：</p>
+<p>Elasticsearch 判断字符串为日期的规则可以通过 dynamic_date_formats 配置 来修改。</p>
+<h3 id="动态模板"><a href="#动态模板" class="headerlink" title="动态模板"></a>动态模板</h3><p>使用 dynamic_templates，你可以完全控制新字段的映射，你设置可以通过字段名或数据类型应用一个完全不同的映射。</p>
+<p>每个模板都有一个名字用于描述这个模板的用途，一个 mapping 字段用于指明这个映射怎么使用，和至少一个参数（例如 match）来定义这个模板适用于哪个字段。</p>
+<p>模板按照顺序来检测，第一个匹配的模板会被启用。例如，我们给 string 类型字段定义两个模板：</p>
+<ul>
+<li>es: 字段名以 _es 结尾需要使用 spanish 分析器。</li>
+<li>en: 所有其他字段使用 english 分析器。</li>
+</ul>
+<p>我们将 es 模板放在第一位，因为它比匹配所有字符串的 en 模板更特殊一点</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;mappings&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;my_type&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;dynamic_templates&quot;: [</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &#123; &quot;es&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                      &quot;match&quot;:              &quot;*_es&quot;, &lt;1&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                      &quot;match_mapping_type&quot;: &quot;string&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                      &quot;mapping&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                          &quot;type&quot;:           &quot;string&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                          &quot;analyzer&quot;:       &quot;spanish&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                      &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &#123; &quot;en&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                      &quot;match&quot;:              &quot;*&quot;, &lt;2&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                      &quot;match_mapping_type&quot;: &quot;string&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                      &quot;mapping&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                          &quot;type&quot;:           &quot;string&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                          &quot;analyzer&quot;:       &quot;english&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                      &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;&#125;&#125;</span></pre></td></tr></table></figure>
+<p>&lt;1&gt; 匹配字段名以 _es 结尾的字段.<br>&lt;2&gt; 匹配所有字符串类型字段。</p>
+<p>match_mapping_type 允许你限制模板只能使用在特定的类型上，就像由标准动态映射规则检测的一样，（例如 strong 和 long）</p>
+<p>match 参数只匹配字段名，path_match 参数则匹配字段在一个对象中的完整路径，所以 address.*.name 规则将匹配一个这样的字段：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">    &quot;address&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;city&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;name&quot;: &quot;New York&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+<p>默认映射<br>通常，一个索引中的所有类型具有共享的字段和设置。用 <em>default</em> 映射来指定公用设置会更加方便，而不是每次创建新的类型时重复操作。<em>default 映射像新类型的模板。所有在 _default</em> 映射 之后 的类型将包含所有的默认设置，除非在自己的类型映射中明确覆盖这些配置。<br>例如，我们可以使用 <em>default</em> 映射对所有类型禁用 <em>all 字段，而只在 blog 字段上开启它：<br>PUT /my_index<br>{<br>    “mappings”: {<br>        “_default</em>“: {<br>            “<em>all”: { “enabled”:  false }<br>        },<br>        “blog”: {<br>            “_all”: { “enabled”:  true  }<br>        }<br>    }<br>}<br>_default</em> 映射也是定义索引级别的动态模板的好地方。<br>unmatch 和 path_unmatch 规则将用于排除未被匹配的字段。</p>
+<h2 id="默认映射"><a href="#默认映射" class="headerlink" title="默认映射"></a>默认映射</h2><p>通常，一个索引中的所有类型具有共享的字段和设置。用 <em>default</em> 映射来指定公用设置会更加方便，而不是每次创建新的类型时重复操作。</p>
+<p><em>default 映射像新类型的模板。所有在 _default</em> 映射 之后 的类型将包含所有的默认设置，除非在自己的类型映射中明确覆盖这些配置。</p>
+<p>例如，我们可以使用 <em>default</em> 映射对所有类型禁用 _all 字段，而只在 blog 字段上开启它：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;mappings&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;_default_&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;_all&quot;: &#123; &quot;enabled&quot;:  false &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;blog&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;_all&quot;: &#123; &quot;enabled&quot;:  true  &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p><em>default</em> 映射也是定义索引级别的动态模板的好地方。</p>
+<h2 id="重新索引数据"><a href="#重新索引数据" class="headerlink" title="重新索引数据"></a>重新索引数据</h2><p>虽然你可以给索引添加新的类型（es版本7.5已经不支持），或给类型添加新的字段，但是你不能添加新的分析器或修改已有字段。假如你这样做，已被索引的数据会变得不正确而你的搜索也不会正常工作。</p>
+<p>修改在已存在的数据最简单的方法是重新索引：创建一个新配置好的索引，然后将所有的文档从旧的索引复制到新的上。</p>
+<p>_source 字段的一个最大的好处是你已经在 Elasticsearch 中有了完整的文档，你不再需要从数据库中重建你的索引，这样通常会比较慢。</p>
+<p>为了更高效的索引旧索引中的文档，使用【scan-scoll】来批量读取旧索引的文档，然后将通过【bulk API】来将它们推送给新的索引。</p>
+<p>批量重新索引：</p>
+<p>你可以在同一时间执行多个重新索引的任务，但是你显然不愿意它们的结果有重叠。所以，可以将重建大索引的任务通过日期或时间戳字段拆分成较小的任务：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;old_index&#x2F;_search?search_type&#x3D;scan&amp;scroll&#x3D;1m</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;range&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;date&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;gte&quot;:  &quot;2014-01-01&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;lt&quot;:   &quot;2014-02-01&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;size&quot;:  1000</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>假如你继续在旧索引上做修改，你可能想确保新增的文档被加到了新的索引中。这可以通过重新运行重建索引程序来完成，但是记得只要过滤出上次执行后新增的文档就行了。</p>
+<h2 id="索引别名和零停机时间"><a href="#索引别名和零停机时间" class="headerlink" title="索引别名和零停机时间"></a>索引别名和零停机时间</h2><p>前面提到的重新索引过程中的问题是必须更新你的应用，来使用另一个索引名。索引别名正是用来解决这个问题的！</p>
+<p>索引 别名 就像一个快捷方式或软连接，可以指向一个或多个索引，也可以给任何需要索引名的 API 使用。别名带给我们极大的灵活性，允许我们做到：</p>
+<ul>
+<li>在一个运行的集群上无缝的从一个索引切换到另一个</li>
+<li>给多个索引分类（例如，last_three_months）</li>
+<li>给索引的一个子集创建 视图</li>
+</ul>
+<p>我们以后会讨论更多别名的使用场景。现在我们将介绍用它们怎么在零停机时间内从旧的索引切换到新的索引。</p>
+<p>这里有两种管理别名的途径：_alias 用于单个操作，_aliases 用于原子化多个操作。</p>
+<p>在这一章中，我们假设你的应用采用一个叫 my_index 的索引。而事实上，my_index 是一个指向当前真实索引的别名。真实的索引名将包含一个版本号：my_index_v1, my_index_v2 等等。</p>
+<p>开始，我们创建一个索引 my_index_v1，然后将别名 my_index 指向它：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index_v1 &lt;1&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index_v1&#x2F;_alias&#x2F;my_index &lt;2&gt;</span></pre></td></tr></table></figure>
+
+<p>&lt;1&gt; 创建索引 my_index_v1。<br>&lt;2&gt; 将别名 my_index 指向 my_index_v1。</p>
+<p>你可以检测这个别名指向哪个索引：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;*&#x2F;_alias&#x2F;my_index</span></pre></td></tr></table></figure>
+
+<p>或哪些别名指向这个索引：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;my_index_v1&#x2F;_alias&#x2F;*</span></pre></td></tr></table></figure>
+
+<p>两者都将返回下列值：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;my_index_v1&quot; : &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;aliases&quot; : &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;my_index&quot; : &#123; &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+<p>然后，我们决定修改索引中一个字段的映射。当然我们不能修改现存的映射，索引我们需要重新索引数据。首先，我们创建有新的映射的索引 </p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PUT &#x2F;my_index_v2</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;mappings&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;my_type&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;properties&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;tags&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;type&quot;:   &quot;string&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;index&quot;:  &quot;not_analyzed&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>然后我们从将数据从 my_index_v1 迁移到 my_index_v2，下面的过程在【重新索引】中描述过了。一旦我们认为数据已经被正确的索引了，我们就将别名指向新的索引。</p>
+<p>别名可以指向多个索引，所以我们需要在新索引中添加别名的同时从旧索引中删除它。这个操作需要原子化，所以我们需要用 _aliases 操作：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST &#x2F;_aliases</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;actions&quot;: [</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#123; &quot;remove&quot;: &#123; &quot;index&quot;: &quot;my_index_v1&quot;, &quot;alias&quot;: &quot;my_index&quot; &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#123; &quot;add&quot;:    &#123; &quot;index&quot;: &quot;my_index_v2&quot;, &quot;alias&quot;: &quot;my_index&quot; &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>这样，你的应用就从旧索引迁移到了新的，而没有停机时间。</p>
+<p>提示：</p>
+<p>即使你认为现在的索引设计已经是完美的了，当你的应用在生产环境使用时，还是有可能在今后有一些改变的。<br>所以请做好准备：在应用中使用别名而不是索引。然后你就可以在任何时候重建索引。别名的开销很小，应当广泛使用。</p>
+]]></content>
+      <categories>
+        <category>ES 搜索引擎</category>
+      </categories>
+      <tags>
+        <tag>ES 搜索引擎</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ES-结构化查询</title>
+    <url>/2019/12/16/ES-%E7%BB%93%E6%9E%84%E5%8C%96%E6%9F%A5%E8%AF%A2/</url>
+    <content><![CDATA[<p>参考：<br><a href="https://es.xiaoleilu.com/054_Query_DSL/55_Request_body_search.html" target="_blank" rel="noopener">https://es.xiaoleilu.com/054_Query_DSL/55_Request_body_search.html</a></p>
+<h2 id="请求体查询"><a href="#请求体查询" class="headerlink" title="请求体查询"></a>请求体查询</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">分页</span></pre></td></tr><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;from&quot;: 30,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;size&quot;: 10</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">查询匹配多个index</span></pre></td></tr><tr><td class="code"><pre><span class="line">GET &#x2F;index_2014*&#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="code"><pre><span class="line">因为Get请求携带请求体数据，不被广泛接受，所以上面的用Post请求可ok。</span></pre></td></tr></table></figure>
+
+<h2 id="结构化查询"><a href="#结构化查询" class="headerlink" title="结构化查询"></a>结构化查询</h2><p>使用结构化查询，你需要传递query参数：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;query&quot;: YOUR_QUERY_HERE</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>空查询 - {} - 在功能上等同于使用match_all查询子句，正如其名字一样，匹配所有的文档：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;match_all&quot;: &#123;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="查询子句"><a href="#查询子句" class="headerlink" title="查询子句"></a>查询子句</h3><p>一个查询子句一般使用这种结构：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    QUERY_NAME: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        ARGUMENT: VALUE,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        ARGUMENT: VALUE,...</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>或指向一个指定的字段：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    QUERY_NAME: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        FIELD_NAME: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            ARGUMENT: VALUE,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            ARGUMENT: VALUE,...</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>例如，你可以使用match查询子句用来找寻在tweet字段中找寻包含elasticsearch的成员：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;match&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;tweet&quot;: &quot;elasticsearch&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>完整的查询请求会是这样：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;match&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;tweet&quot;: &quot;elasticsearch&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h2 id="查询与过滤"><a href="#查询与过滤" class="headerlink" title="查询与过滤"></a>查询与过滤</h2><p>可以使用两种结构化语句： 结构化查询（Query DSL）和结构化过滤（Filter DSL）。 查询与过滤语句非常相似，但是它们由于使用目的不同而稍有差异。</p>
+<p>一条过滤语句会询问每个文档的字段值是否包含着特定值：</p>
+<ul>
+<li>created 的日期范围是否在 2013 到 2014 ?</li>
+<li>status 字段中是否包含单词 “published” ?</li>
+<li>lat_lon 字段中的地理位置与目标点相距是否不超过10km ?</li>
+</ul>
+<p>一条查询语句与过滤语句相似，但问法不同：</p>
+<p>查询语句会询问每个文档的字段值与特定值的匹配程度如何？</p>
+<p>查询语句的典型用法是为了找到文档：</p>
+<ul>
+<li>查找与 full text search 这个词语最佳匹配的文档</li>
+<li>查找包含单词 run ，但是也包含runs, running, jog 或 sprint的文档</li>
+<li>同时包含着 quick, brown 和 fox — 单词间离得越近，该文档的相关性越高</li>
+<li>标识着 lucene, search 或 java — 标识词越多，该文档的相关性越高</li>
+</ul>
+<p>一条查询语句会计算每个文档与查询语句的相关性，会给出一个相关性评分 _score，并且 按照相关性对匹配到的文档进行排序。 这种评分方式非常适用于一个没有完全配置结果的全文本搜索。</p>
+<h3 id="性能差异"><a href="#性能差异" class="headerlink" title="性能差异"></a>性能差异</h3><p>使用过滤语句得到的结果集 – 一个简单的文档列表，快速匹配运算并存入内存是十分方便的， 每个文档仅需要1个字节。这些缓存的过滤结果集与后续请求的结合使用是非常高效的。</p>
+<p>查询语句不仅要查找相匹配的文档，还需要计算每个文档的相关性，所以一般来说查询语句要比过滤语句更耗时，并且查询结果也不可缓存。</p>
+<p>幸亏有了倒排索引，一个只匹配少量文档的简单查询语句在百万级文档中的查询效率会与一条经过缓存的过滤语句旗鼓相当，甚至略占上风。 但是一般情况下，一条经过缓存的过滤查询要远胜一条查询语句的执行效率。</p>
+<p>过滤语句的目的就是缩小匹配的文档结果集，所以需要仔细检查过滤条件。</p>
+<h3 id="什么情况下使用"><a href="#什么情况下使用" class="headerlink" title="什么情况下使用"></a>什么情况下使用</h3><p>原则上来说，使用查询语句做全文本搜索或其他需要进行相关性评分的时候，剩下的全部用过滤语句。</p>
+<h2 id="过滤查询"><a href="#过滤查询" class="headerlink" title="过滤查询"></a>过滤查询</h2><h3 id="term过滤"><a href="#term过滤" class="headerlink" title="term过滤"></a>term过滤</h3><p>term主要用于精确匹配哪些值，比如数字，日期，布尔值或 not_analyzed的字符串(未经分析的文本数据类型)：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123; &quot;term&quot;: &#123; &quot;age&quot;:    26           &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123; &quot;term&quot;: &#123; &quot;date&quot;:   &quot;2014-09-01&quot; &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123; &quot;term&quot;: &#123; &quot;public&quot;: true         &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123; &quot;term&quot;: &#123; &quot;tag&quot;:    &quot;full_text&quot;  &#125;&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="terms-过滤"><a href="#terms-过滤" class="headerlink" title="terms 过滤"></a>terms 过滤</h3><p>terms 跟 term 有点类似，但 terms 允许指定多个匹配条件。 如果某个字段指定了多个值，那么文档需要一起去做匹配：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;terms&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;tag&quot;: [ &quot;search&quot;, &quot;full_text&quot;, &quot;nosql&quot; ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="range-过滤"><a href="#range-过滤" class="headerlink" title="range 过滤"></a>range 过滤</h3><p>range过滤允许我们按照指定范围查找一批数据：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;range&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;age&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;gte&quot;:  20,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;lt&quot;:   30</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>范围操作符包含：</p>
+<ul>
+<li>gt :: 大于</li>
+<li>gte:: 大于等于</li>
+<li>lt :: 小于</li>
+<li>lte:: 小于等于</li>
+</ul>
+<h3 id="exists-和-missing-过滤"><a href="#exists-和-missing-过滤" class="headerlink" title="exists 和 missing 过滤"></a>exists 和 missing 过滤</h3><p>exists 和 missing 过滤可以用于查找文档中是否包含指定字段或没有某个字段，类似于SQL语句中的IS_NULL条件</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;exists&quot;:   &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;field&quot;:    &quot;title&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>这两个过滤只是针对已经查出一批数据来，但是想区分出某个字段是否存在的时候使用。</p>
+<h3 id="bool-过滤"><a href="#bool-过滤" class="headerlink" title="bool 过滤"></a>bool 过滤</h3><p>bool 过滤可以用来合并多个过滤条件查询结果的布尔逻辑，它包含一下操作符：</p>
+<ul>
+<li>must :: 多个查询条件的完全匹配,相当于 and。</li>
+<li>must_not :: 多个查询条件的相反匹配，相当于 not。</li>
+<li>should :: 至少有一个查询条件匹配, 相当于 or。</li>
+</ul>
+<p>这些参数可以分别继承一个过滤条件或者一个过滤条件的数组：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;bool&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;must&quot;:     &#123; &quot;term&quot;: &#123; &quot;folder&quot;: &quot;inbox&quot; &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;must_not&quot;: &#123; &quot;term&quot;: &#123; &quot;tag&quot;:    &quot;spam&quot;  &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;should&quot;: [</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &#123; &quot;term&quot;: &#123; &quot;starred&quot;: true   &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &#123; &quot;term&quot;: &#123; &quot;unread&quot;:  true   &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="match-all-查询"><a href="#match-all-查询" class="headerlink" title="match_all 查询"></a>match_all 查询</h3><p>使用match_all 可以查询到所有文档，是没有查询条件下的默认语句。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;match_all&quot;: &#123;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>此查询常用于合并过滤条件。 比如说你需要检索所有的邮箱,所有的文档相关性都是相同的，所以得到的_score为1</p>
+<h3 id="match-查询"><a href="#match-查询" class="headerlink" title="match 查询"></a>match 查询</h3><p>match查询是一个标准查询，不管你需要全文本查询还是精确查询基本上都要用到它。</p>
+<p>如果你使用 match 查询一个全文本字段，它会在真正查询之前用分析器先分析match一下查询字符：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;match&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;tweet&quot;: &quot;About Search&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>如果用match下指定了一个确切值，在遇到数字，日期，布尔值或者not_analyzed 的字符串时，它将为你搜索你给定的值：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123; &quot;match&quot;: &#123; &quot;age&quot;:    26           &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123; &quot;match&quot;: &#123; &quot;date&quot;:   &quot;2014-09-01&quot; &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123; &quot;match&quot;: &#123; &quot;public&quot;: true         &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123; &quot;match&quot;: &#123; &quot;tag&quot;:    &quot;full_text&quot;  &#125;&#125;</span></pre></td></tr></table></figure>
+
+<p>提示： 做精确匹配搜索时，你最好用过滤语句，因为过滤语句可以缓存数据。</p>
+<p>match查询不可以用类似”+usid:2 +tweet:search”这样的语句。 它只能就指定某个确切字段某个确切的值进行搜索，而你要做的就是为它指定正确的字段名以避免语法错误。</p>
+<h3 id="multi-match-查询"><a href="#multi-match-查询" class="headerlink" title="multi_match 查询"></a>multi_match 查询</h3><p>multi_match查询允许你做match查询的基础上同时搜索多个字段：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;multi_match&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;query&quot;:    &quot;full text search&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;fields&quot;:   [ &quot;title&quot;, &quot;body&quot; ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="bool-查询"><a href="#bool-查询" class="headerlink" title="bool 查询"></a>bool 查询</h3><p>bool 查询与 bool 过滤相似，用于合并多个查询子句。不同的是，bool 过滤可以直接给出是否匹配成功， 而bool 查询要计算每一个查询子句的 _score （相关性分值）。</p>
+<ul>
+<li>must:: 查询指定文档一定要被包含。</li>
+<li>must_not:: 查询指定文档一定不要被包含。</li>
+<li>should:: 查询指定文档，有则可以为文档相关性加分。</li>
+</ul>
+<p>以下查询将会找到 title 字段中包含 “how to make millions”，并且 “tag” 字段没有被标为 spam。 如果有标识为 “starred” 或者发布日期为2014年之前，那么这些匹配的文档将比同类网站等级高：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;bool&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;must&quot;:     &#123; &quot;match&quot;: &#123; &quot;title&quot;: &quot;how to make millions&quot; &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;must_not&quot;: &#123; &quot;match&quot;: &#123; &quot;tag&quot;:   &quot;spam&quot; &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;should&quot;: [</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#123; &quot;match&quot;: &#123; &quot;tag&quot;: &quot;starred&quot; &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#123; &quot;range&quot;: &#123; &quot;date&quot;: &#123; &quot;gte&quot;: &quot;2014-01-01&quot; &#125;&#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>提示： 如果bool查询下没有must子句，那至少应该有一个should子句。但是如果有must子句，那么没有should子句也可以进行查询。</p>
+<h2 id="查询与过滤条件的合并"><a href="#查询与过滤条件的合并" class="headerlink" title="查询与过滤条件的合并"></a>查询与过滤条件的合并</h2><p>查询语句和过滤语句可以放在各自的上下文中。 在 ElasticSearch API 中我们会看到许多带有 query 或 filter 的语句。 这些语句既可以包含单条 query 语句，也可以包含一条 filter 子句。 换句话说，这些语句需要首先创建一个query或filter的上下文关系。</p>
+<p>复合查询语句可以加入其他查询子句，复合过滤语句也可以加入其他过滤子句。 通常情况下，一条查询语句需要过滤语句的辅助，全文本搜索除外。</p>
+<p>所以说，查询语句可以包含过滤子句，反之亦然。 以便于我们切换 query 或 filter 的上下文。这就要求我们在读懂需求的同时构造正确有效的语句。</p>
+<h3 id="带过滤的查询语句"><a href="#带过滤的查询语句" class="headerlink" title="带过滤的查询语句"></a>带过滤的查询语句</h3><h4 id="过滤一条查询语句"><a href="#过滤一条查询语句" class="headerlink" title="过滤一条查询语句"></a>过滤一条查询语句</h4><p>比如说我们有这样一条查询语句:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;match&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;email&quot;: &quot;business opportunity&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>然后我们想要让这条语句加入 term 过滤，在收信箱中匹配邮件：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;term&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;folder&quot;: &quot;inbox&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>search API中只能包含 query 语句，所以我们需要用 filtered 来同时包含 “query” 和 “filter” 子句：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;filtered&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;query&quot;:  &#123; &quot;match&quot;: &#123; &quot;email&quot;: &quot;business opportunity&quot; &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;filter&quot;: &#123; &quot;term&quot;:  &#123; &quot;folder&quot;: &quot;inbox&quot; &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>我们在外层再加入 query 的上下文关系：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;filtered&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;query&quot;:  &#123; &quot;match&quot;: &#123; &quot;email&quot;: &quot;business opportunity&quot; &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;filter&quot;: &#123; &quot;term&quot;: &#123; &quot;folder&quot;: &quot;inbox&quot; &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="单条过滤语句"><a href="#单条过滤语句" class="headerlink" title="单条过滤语句"></a>单条过滤语句</h3><p>在 query 上下文中，如果你只需要一条过滤语句，比如在匹配全部邮件的时候，你可以 省略 query 子句：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;filtered&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;filter&quot;:   &#123; &quot;term&quot;: &#123; &quot;folder&quot;: &quot;inbox&quot; &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>如果一条查询语句没有指定查询范围，那么它默认使用 match_all 查询，所以上面语句 的完整形式如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;filtered&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;query&quot;:    &#123; &quot;match_all&quot;: &#123;&#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;filter&quot;:   &#123; &quot;term&quot;: &#123; &quot;folder&quot;: &quot;inbox&quot; &#125;&#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="查询语句中的过滤"><a href="#查询语句中的过滤" class="headerlink" title="查询语句中的过滤"></a>查询语句中的过滤</h3><p>有时候，你需要在 filter 的上下文中使用一个 query 子句。下面的语句就是一条带有查询功能 的过滤语句， 这条语句可以过滤掉看起来像垃圾邮件的文档：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;_search</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &quot;filtered&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &quot;filter&quot;:   &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &quot;bool&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;must&quot;:     &#123; &quot;term&quot;:  &#123; &quot;folder&quot;: &quot;inbox&quot; &#125;&#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &quot;must_not&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                        &quot;query&quot;: &#123; &lt;1&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                            &quot;match&quot;: &#123; &quot;email&quot;: &quot;urgent business proposal&quot; &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">                &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">            &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>&lt;1&gt; 过滤语句中可以使用query查询的方式代替 bool 过滤子句。</p>
+<p>提示： 我们很少用到的过滤语句中包含查询，保留这种用法只是为了语法的完整性。 只有在过滤中用到全文本匹配的时候才会使用这种结构。</p>
+<h2 id="验证查询"><a href="#验证查询" class="headerlink" title="验证查询"></a>验证查询</h2><p>查询语句可以变得非常复杂，特别是与不同的分析器和字段映射相结合后，就会有些难度。<br>validate API 可以验证一条查询语句是否合法。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;gb&#x2F;_validate&#x2F;query</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">   &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &quot;tweet&quot; : &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">         &quot;match&quot; : &quot;really powerful&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">   &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>以上请求的返回值告诉我们这条语句是非法的：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">  &quot;valid&quot; :         false</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="理解错误信息"><a href="#理解错误信息" class="headerlink" title="理解错误信息"></a>理解错误信息</h3><p>想知道语句非法的具体错误信息，需要加上 explain 参数：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;gb&#x2F;_validate&#x2F;query?explain &lt;1&gt;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">   &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &quot;tweet&quot; : &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">         &quot;match&quot; : &quot;really powerful&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">   &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>&lt;1&gt; explain 参数可以提供语句错误的更多详情。<br>很显然，我们把 query 语句的 match 与字段名位置弄反了：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">  &quot;valid&quot; : false,</span></pre></td></tr><tr><td class="code"><pre><span class="line">  &quot;error&quot; : &quot;org.elasticsearch.common.ParsingException: no [query] registered for [tweet]&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<h3 id="理解查询语句"><a href="#理解查询语句" class="headerlink" title="理解查询语句"></a>理解查询语句</h3><p>如果是合法语句的话，使用 explain 参数可以返回一个带有查询语句的可阅读描述， 可以帮助了解查询语句在ES中是如何执行的：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET &#x2F;gb&#x2F;_validate&#x2F;query?explain</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">   &quot;query&quot;: &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &quot;match&quot; : &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">         &quot;tweet&quot;: &quot;really powerful&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">   &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>explanation 会为每一个索引返回一段描述，因为每个索引会有不同的映射关系和分析器：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">  &quot;_shards&quot; : &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;total&quot; : 1,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;successful&quot; : 1,</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &quot;failed&quot; : 0</span></pre></td></tr><tr><td class="code"><pre><span class="line">  &#125;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">  &quot;valid&quot; : true,</span></pre></td></tr><tr><td class="code"><pre><span class="line">  &quot;explanations&quot; : [</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#123;</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &quot;index&quot; : &quot;gb&quot;,</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &quot;valid&quot; : true,</span></pre></td></tr><tr><td class="code"><pre><span class="line">      &quot;explanation&quot; : &quot;tweet:really tweet:powerful&quot;</span></pre></td></tr><tr><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="code"><pre><span class="line">  ]</span></pre></td></tr><tr><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure>
+
+<p>从返回的 explanation 你会看到 match 是如何为查询字符串 “really powerful” 进行查询的， 首先，它被拆分成两个独立的词分别在 tweet 字段中进行查询。</p>
+<p>而且，在索引us中这两个词为”really”和”powerful”，在索引gb中被拆分成”really” 和 “power”。 这是因为我们在索引gb中使用了english分析器。</p>
+]]></content>
+      <categories>
+        <category>ES 搜索引擎</category>
+      </categories>
+      <tags>
+        <tag>ES 搜索引擎 查询</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>ES映射和分析</title>
     <url>/2019/12/14/ES%E6%98%A0%E5%B0%84%E5%92%8C%E5%88%86%E6%9E%90/</url>
     <content><![CDATA[<p><a href="https://es.xiaoleilu.com/052_Mapping_Analysis/00_Intro.html" target="_blank" rel="noopener">https://es.xiaoleilu.com/052_Mapping_Analysis/00_Intro.html</a></p>
